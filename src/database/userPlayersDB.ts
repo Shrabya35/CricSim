@@ -199,6 +199,25 @@ export default class userPlayersDB {
     console.log('🟢 All players updated successfully!');
   }
 
+  public static async resetSeasonStats() {
+    try {
+      const db = await userPlayersDB.getDB();
+
+      await db.executeSql(`
+      UPDATE userPlayers
+      SET played = 0,
+          runs = 0,
+          wickets = 0
+    `);
+
+      console.log(
+        '🟢 Season stats reset for all players (played, runs, wickets).',
+      );
+    } catch (error) {
+      console.log('❌ resetSeasonStats ERROR:', error);
+    }
+  }
+
   public static async getStatistics(
     season: 'Season' | 'Career',
     type: 'Bat' | 'Ball',

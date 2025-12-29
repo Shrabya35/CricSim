@@ -152,6 +152,26 @@ export default class FixturesDB {
     }
   }
 
+  public static async resetFixturesStats(): Promise<void> {
+    try {
+      const db = await FixturesDB.getDB();
+
+      await db.executeSql(
+        `UPDATE fixtures
+       SET completed = 0,
+           yourRun = NULL,
+           yourWicket = NULL,
+           oppRun = NULL,
+           oppWicket = NULL,
+           winText = NULL`,
+      );
+
+      console.log('🟢 All fixtures reset successfully.');
+    } catch (error) {
+      console.log('❌ resetFixturesStats ERROR:', error);
+    }
+  }
+
   public static async dropFixtures(): Promise<void> {
     try {
       const db = await FixturesDB.getDB();

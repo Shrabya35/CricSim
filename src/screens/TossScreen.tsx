@@ -156,9 +156,11 @@ const TossScreen = () => {
   };
 
   const handleBatBallChoice = (choice: 'bat' | 'ball') => {
-    setTossState(prev => (prev ? { ...prev, choice } : null));
     if (!tossState) return;
-    navigation.navigate('Match', { tossState });
+    const updated = { ...tossState, choice };
+    setTossState(updated);
+    setTossModalVisible(false);
+    navigation.navigate('Match', { tossState: updated });
   };
 
   return (

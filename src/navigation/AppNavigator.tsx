@@ -17,6 +17,7 @@ import TossScreen from '../screens/TossScreen';
 import MatchScreen from '../screens/MatchScreen';
 import MatchSummaryScreen from '../screens/MatchSummaryScreen';
 import StatisticsScreen from '../screens/StatisticsScreen';
+import SeasonSummaryScreen from '../screens/SeasonSummaryScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -43,6 +44,7 @@ const AppNavigator = () => {
       <Stack.Screen name="Match" component={MatchScreen} />
       <Stack.Screen name="MatchSummary" component={MatchSummaryScreen} />
       <Stack.Screen name="Statistics" component={StatisticsScreen} />
+      <Stack.Screen name="SeasonSummary" component={SeasonSummaryScreen} />
     </Stack.Navigator>
   );
 };

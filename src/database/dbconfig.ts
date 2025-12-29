@@ -58,6 +58,20 @@ export default class DBConfig {
     }
   }
 
+  public static async getSelectedUserTeam(): Promise<string | null> {
+    const db = await DBConfig.getDB();
+
+    const [result] = await db.executeSql(
+      `SELECT selectedTeam FROM user_data LIMIT 1`,
+    );
+
+    if (result.rows.length > 0) {
+      return result.rows.item(0).selectedTeam;
+    }
+
+    return null;
+  }
+
   public static async hasGameStarted(): Promise<boolean> {
     try {
       const db = await DBConfig.getDB();

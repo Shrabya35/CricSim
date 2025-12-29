@@ -163,12 +163,13 @@ const MatchScreen = () => {
     if (!match || !match.oppTeam) return;
 
     console.log(match);
+    console.log(tossState);
 
     setYourTeam(match.yourTeam);
     setOppTeam(match.oppTeam);
     setYourPlayers(mapToPlayers(match.yourPlayers).slice(0, 11));
     setOppPlayers(mapToPlayers(match.oppTeam.players, true).slice(0, 11));
-  }, []);
+  }, [tossState]);
 
   useFocusEffect(
     useCallback(() => {
@@ -602,6 +603,7 @@ const MatchScreen = () => {
             }),
           );
           break;
+
         case 'wicket': {
           inning.wickets += 1;
 
@@ -610,6 +612,7 @@ const MatchScreen = () => {
             bowler: bowler.player,
             fieldingTeam: bowlingLineup,
           });
+          console.log(text);
 
           if (bowlerGetsWicket) {
             bowler.wickets += 1;

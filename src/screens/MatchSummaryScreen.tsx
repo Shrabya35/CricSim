@@ -23,7 +23,7 @@ import userPlayersDB, { UpdatePlayerStats } from '../database/userPlayersDB';
 import StandingsDB from '../database/standings';
 import FixturesDB from '../database/fixturesDB';
 
-type PlayerStatsScreenNavigationProp = NativeStackNavigationProp<
+type MatchSummaryScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'MatchSummary'
 >;
@@ -38,7 +38,7 @@ interface MOTM {
 type TabInterface = 'Summary' | 'Score';
 
 const MatchSummaryScreen = () => {
-  const navigation = useNavigation<PlayerStatsScreenNavigationProp>();
+  const navigation = useNavigation<MatchSummaryScreenNavigationProp>();
   const insets = useSafeAreaInsets();
   const route = useRoute();
   const { state, bothTeam } = route.params as {
@@ -229,7 +229,7 @@ const MatchSummaryScreen = () => {
 
       await userPlayersDB.updateUserPlayers(playersStats);
 
-      await StandingsDB.updateStanding(
+      const result = await StandingsDB.updateStanding(
         bothTeam.team1.name ?? 'Team 1',
         bothTeam.team2.name ?? 'Team 2',
         standing.winner,
@@ -244,7 +244,12 @@ const MatchSummaryScreen = () => {
         winText,
       );
 
-      navigation.navigate('Dashboard');
+      if (result.gameEnded) {
+        console.log(result.teams);
+        navigation.navigate('SeasonSummary', { result });
+      } else {
+        navigation.navigate('Dashboard');
+      }
     } catch (error) {
       console.error('❌ Error ending game:', error);
     }

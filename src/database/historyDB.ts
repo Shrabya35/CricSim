@@ -98,6 +98,48 @@ export default class HistoryDB {
     }
   }
 
+  public static async updateWinner(
+    year: string,
+    name: string,
+    logo: string,
+    theme: string,
+  ): Promise<void> {
+    try {
+      const db = await HistoryDB.getDB();
+
+      await db.executeSql(
+        `UPDATE history
+         SET name = ?, logo = ?, theme = ?, ongoing = 0
+         WHERE year = ?`,
+        [name, logo, theme, year],
+      );
+
+      console.log(`🟢 Updated winner for year ${year}: ${name}`);
+    } catch (error) {
+      console.log('❌ updateWinner ERROR:', error);
+    }
+  }
+
+  public static async setOngoing(
+    year: string,
+    ongoing: boolean,
+  ): Promise<void> {
+    try {
+      const db = await HistoryDB.getDB();
+
+      await db.executeSql(
+        `UPDATE history
+         SET ongoing = ?
+         WHERE year = ?`,
+        [ongoing ? 1 : 0, year],
+      );
+
+      console.log(`🟢 Set ongoing = ${ongoing} for year ${year}`);
+    } catch (error) {
+      console.log('❌ setOngoing ERROR:', error);
+    }
+  }
+
   public static async dropHistory(): Promise<void> {
     try {
       const db = await HistoryDB.getDB();
