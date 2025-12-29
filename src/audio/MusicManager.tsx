@@ -1,19 +1,22 @@
 import Sound from 'react-native-sound';
-import { Platform } from 'react-native';
+import { AppState, AppStateStatus, Platform } from 'react-native';
 import { Settings } from '../database/settings';
+
+Sound.setCategory('Playback');
 
 class MusicManager {
   private static instance: MusicManager;
+
   private sound: Sound | null = null;
+  private currentTrack: string | null = null;
+  private isPausedByAppState = false;
 
   private constructor() {
-    if (Platform.OS === 'android') {
-      Sound.setCategory('Playback');
-    }
-
     Settings.onChange(settings => {
       this.sound?.setVolume(settings.volume);
     });
+
+    AppState.addEventListener('change', this.handleAppStateChange);
   }
 
   static getInstance() {
@@ -23,32 +26,70 @@ class MusicManager {
     return MusicManager.instance;
   }
 
+  private handleAppStateChange = (state: AppStateStatus) => {
+    if (!this.sound) return;
+
+    if (state !== 'active') {
+      this.isPausedByAppState = true;
+      this.sound.pause();
+    } else {
+      if (this.isPausedByAppState) {
+        this.sound.play();
+        this.isPausedByAppState = false;
+      }
+    }
+  };
+
   play(track: string) {
     if (Platform.OS !== 'android') return;
 
+    if (this.currentTrack === track && this.sound !== null) {
+      return;
+    }
+
     this.stop();
 
+    this.currentTrack = track;
+
     Settings.load().then(settings => {
-      const sound = new Sound(track, Sound.MAIN_BUNDLE, error => {
+      const newSound = new Sound(track, Sound.MAIN_BUNDLE, error => {
         if (error) {
           console.log('Music load failed', error);
           return;
         }
 
-        sound.setNumberOfLoops(-1);
-        sound.setVolume(settings.volume);
-        sound.play();
+        newSound.setNumberOfLoops(-1);
+        newSound.setVolume(settings.volume);
+        newSound.play();
       });
 
-      this.sound = sound;
+      this.sound = newSound;
     });
   }
 
   stop() {
-    this.sound?.stop(() => {
-      this.sound?.release();
-      this.sound = null;
-    });
+    if (this.sound) {
+      this.sound.stop(() => {
+        this.sound?.release();
+        this.sound = null;
+      });
+    }
+
+    this.currentTrack = null;
+  }
+
+  pause() {
+    this.sound?.pause();
+  }
+
+  resume() {
+    if (this.sound && this.currentTrack) {
+      this.sound.play();
+    }
+  }
+
+  getCurrentTrack() {
+    return this.currentTrack;
   }
 }
 

@@ -7,10 +7,7 @@ import MusicManager from './src/audio/MusicManager';
 const App = () => {
   useEffect(() => {
     MusicManager.play('bgm.mp3');
-
-    return () => {
-      MusicManager.stop();
-    };
+    return () => MusicManager.stop();
   }, []);
 
   return (
