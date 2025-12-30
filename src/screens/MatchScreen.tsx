@@ -105,6 +105,8 @@ const MatchScreen = () => {
     commentary: 'Lets get Started',
   });
 
+  const pendingActivePlayers = React.useRef<ActivePlayersState | null>(null);
+
   const [lastSixBalls, setLastSixBalls] = useState<LastBallToken[]>(
     Array(6).fill(null),
   );
@@ -612,7 +614,6 @@ const MatchScreen = () => {
             bowler: bowler.player,
             fieldingTeam: bowlingLineup,
           });
-          console.log(text);
 
           if (bowlerGetsWicket) {
             bowler.wickets += 1;
@@ -641,29 +642,41 @@ const MatchScreen = () => {
               outType: text,
             }),
           );
-          console.log(inning.batsmen);
 
           if (nextBatsmanIndex < battingOrder.length) {
             const nextPlayer = battingOrder[nextBatsmanIndex];
 
-            inning.batsmen = updateBatsman(
-              inning.batsmen,
-              nextPlayer.name,
-              b => ({
-                ...b,
-                status: 'active',
-              }),
+            const nextBatsmanInInning = inning.batsmen.find(
+              b => b.player.name === nextPlayer.name,
             );
 
-            left = {
-              player: nextPlayer,
-              aggression: 3,
-              run: 0,
-              ball: 0,
-            };
+            if (nextBatsmanInInning) {
+              inning.batsmen = updateBatsman(
+                inning.batsmen,
+                nextPlayer.name,
+                b => ({
+                  ...b,
+                  status: 'active',
+                }),
+              );
 
-            setNextBatsmanIndex(p => p + 1);
+              const newLeft = {
+                player: nextPlayer,
+                aggression: 3,
+                run: nextBatsmanInInning.runs,
+                ball: nextBatsmanInInning.balls,
+              };
+
+              pendingActivePlayers.current = {
+                left: newLeft,
+                right,
+              };
+
+              left = newLeft;
+              setNextBatsmanIndex(p => p + 1);
+            }
           }
+
           setsimulateDisable(true);
           setWicketAlert(true);
           break;
@@ -926,6 +939,10 @@ const MatchScreen = () => {
           battingTeam === 'opp' ? oppTeam?.themeColor : yourTeam?.themeColor
         }
         onOk={() => {
+          if (pendingActivePlayers.current) {
+            setActivePlayers(pendingActivePlayers.current);
+            pendingActivePlayers.current = null;
+          }
           setWicketAlert(false);
           setsimulateDisable(false);
           setOutBatsman(null);

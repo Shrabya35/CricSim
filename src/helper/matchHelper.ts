@@ -1,6 +1,6 @@
 import { COMMENTARY } from '../constants';
 import { BallOutcome, Fielding, WicketType } from '../services/matchService';
-import { Player } from '../types/match';
+import { ActivePlayersState, InningState, Player } from '../types/match';
 
 export const mapToPlayers = (
   playersArray: any[],
@@ -183,4 +183,59 @@ export const generateBowlingLineup = (players: Player[]): Player[] => {
   }
   // console.log(lineup);
   return lineup;
+};
+
+export const getBallToken = (outcome: any): string => {
+  switch (outcome.type) {
+    case 'dot':
+      return '0';
+    case 'run':
+      return String(outcome.runs);
+    case 'four':
+      return '4';
+    case 'six':
+      return '6';
+    case 'wide':
+      return 'Wide';
+    case 'noBall':
+      return 'NB';
+    case 'wicket':
+      return 'WK';
+    case 'legBye':
+      return `${outcome.runs}LB`;
+    default:
+      return '';
+  }
+};
+
+export const syncActivePlayersWithInning = (
+  inning: InningState,
+  activePlayers: ActivePlayersState,
+) => {
+  if (!activePlayers.left || !activePlayers.right) return activePlayers;
+
+  const updatedLeft = { ...activePlayers.left };
+  const updatedRight = { ...activePlayers.right };
+
+  const leftInInning = inning.batsmen.find(
+    b => b.player.name === activePlayers.left?.player.name,
+  );
+  const rightInInning = inning.batsmen.find(
+    b => b.player.name === activePlayers.right?.player.name,
+  );
+
+  if (leftInInning) {
+    updatedLeft.run = leftInInning.runs;
+    updatedLeft.ball = leftInInning.balls;
+  }
+
+  if (rightInInning) {
+    updatedRight.run = rightInInning.runs;
+    updatedRight.ball = rightInInning.balls;
+  }
+
+  return {
+    left: updatedLeft,
+    right: updatedRight,
+  };
 };
