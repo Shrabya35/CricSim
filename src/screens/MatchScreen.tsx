@@ -44,6 +44,7 @@ import WicketAlert from '../components/WicketAlert';
 import InningsAlert, { partialInning } from '../components/InningsAlert';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
+import FieldingSelection from '../components/FieldingSelection';
 
 type MatchScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -87,6 +88,7 @@ const MatchScreen = () => {
   const [simulateDisable, setsimulateDisable] = useState(false);
   const [wicketAlert, setWicketAlert] = useState(false);
   const [inningsAlert, setInningsAlert] = useState(false);
+  const [fieldingModalVisible, setFieldingVisible] = useState(false);
 
   const [subTitle, setSubtitle] = useState('0.00');
 
@@ -180,34 +182,37 @@ const MatchScreen = () => {
   );
 
   useEffect(() => {
-    if (!tossState || yourPlayers.length === 0) return;
+    if (!tossState || yourPlayers.length === 0 || oppPlayers.length === 0)
+      return;
 
     const userBats =
       (tossState.winner === 'user' && tossState.choice === 'bat') ||
       (tossState.winner === 'opp' && tossState.choice !== 'bat');
 
-    setBattingTeam(userBats ? 'user' : 'opp');
+    const battingTeam2: 'user' | 'opp' = userBats ? 'user' : 'opp';
+    const bowlingTeam: 'user' | 'opp' = userBats ? 'opp' : 'user';
 
-    const localteam1 = {
+    const localUserTeam = {
       name: yourTeam?.name,
       logo: yourTeam?.logo,
       theme: yourTeam?.themeColor,
     };
-    const localteam2 = {
+
+    const localOppTeam = {
       name: oppTeam?.name,
       logo: oppTeam?.logo,
       theme: oppTeam?.themeColor,
     };
 
     setBothTeam({
-      team1: userBats ? localteam1 : localteam2,
-      team2: userBats ? localteam2 : localteam1,
+      team1: userBats ? localUserTeam : localOppTeam,
+      team2: userBats ? localOppTeam : localUserTeam,
     });
 
-    const lineup = userBats ? yourPlayers : oppPlayers;
-    setBattingOrder(lineup);
+    const battingLineup = userBats ? yourPlayers : oppPlayers;
+    setBattingOrder(battingLineup);
 
-    const initialBatsmen = lineup.map((p, index) => ({
+    const initialBatsmen = battingLineup.map((p, index) => ({
       player: p,
       runs: 0,
       balls: 0,
@@ -215,8 +220,8 @@ const MatchScreen = () => {
     }));
 
     setActivePlayers({
-      left: { player: lineup[0], aggression: 3, run: 0, ball: 0 },
-      right: { player: lineup[1], aggression: 3, run: 0, ball: 0 },
+      left: { player: battingLineup[0], aggression: 3, run: 0, ball: 0 },
+      right: { player: battingLineup[1], aggression: 3, run: 0, ball: 0 },
     });
 
     setNextBatsmanIndex(2);
@@ -240,6 +245,8 @@ const MatchScreen = () => {
 
     setGameState(prev => ({
       ...prev,
+      battingTeam2,
+      bowlingTeam,
       inning1: {
         ...prev.inning1,
         runs: 0,
@@ -263,13 +270,24 @@ const MatchScreen = () => {
   ]);
 
   useEffect(() => {
+    console.log(gameState.bowlingTeam, over);
+    if (gameState.bowlingTeam !== 'opp') return;
+
     const o = over + 1;
+
     if (o <= 3) setFielding('Attacking 1');
     else if (o <= 6) setFielding('Attacking 2');
     else if (o <= 10) setFielding('Neutral 1');
     else if (o <= 16) setFielding('Neutral 2');
     else setFielding('Defensive 1');
-  }, [over]);
+  }, [over, gameState.bowlingTeam]);
+
+  useEffect(() => {
+    if (gameState.bowlingTeam === 'user') {
+      console.log('Fielding set to Attacking 1 for user bowling');
+      setFielding('Attacking 1');
+    }
+  }, [gameState.bowlingTeam]);
 
   const getBallToken = (outcome: any): string => {
     switch (outcome.type) {
@@ -865,6 +883,10 @@ const MatchScreen = () => {
                     ? oppTeam?.themeColor
                     : yourTeam?.themeColor
                 }
+                onOk={() => {
+                  setsimulateDisable(true);
+                  setFieldingVisible(true);
+                }}
               />
             )}
 
@@ -955,6 +977,15 @@ const MatchScreen = () => {
         inning1={inningProps?.inning1 ?? { run: 0, wicket: 0, ball: 0 }}
         inning2={inningProps?.inning2 ?? { run: 0, wicket: 0, ball: 0 }}
         onOk={closeInningAlert}
+      />
+      <FieldingSelection
+        visible={fieldingModalVisible}
+        onOk={(selectedFielding: string) => {
+          setFielding(selectedFielding);
+          setFieldingVisible(false);
+          setsimulateDisable(false);
+        }}
+        over={over}
       />
       <MatchMusic />
     </View>

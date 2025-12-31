@@ -9,6 +9,7 @@ type Props = {
   batting: 'user' | 'opp' | null;
   theme: string | undefined;
   fielding: string;
+  onOk: () => void;
 };
 
 const fieldingImages: { [key: string]: any } = {
@@ -21,7 +22,7 @@ const fieldingImages: { [key: string]: any } = {
   defaultFielding: require('../assets/attacking1.png'),
 };
 
-const BallingSection = ({ bowler, batting, theme, fielding }: Props) => {
+const BallingSection = ({ bowler, batting, theme, fielding, onOk }: Props) => {
   if (!bowler) return null;
   const fieldingType = fielding || 'defaultFielding';
   const displayField = fielding?.split(' ')[0] || 'Attacking';
@@ -82,6 +83,7 @@ const BallingSection = ({ bowler, batting, theme, fielding }: Props) => {
               paddingVertical: 3,
               paddingHorizontal: 8,
             }}
+            onPress={onOk}
           >
             <Text style={{ color: '#fff' }}>Change Field</Text>
           </TouchableOpacity>
