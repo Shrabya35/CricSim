@@ -24,6 +24,7 @@ import InfoModal from '../components/InfoModal';
 import StandingsDB from '../database/standings';
 import HistoryDB from '../database/historyDB';
 import FixturesDB from '../database/fixturesDB';
+import { Inter } from '../constants/fonts';
 
 type DashboardScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -178,7 +179,9 @@ const DashboardScreen = () => {
                 style={styles.trophyImage}
                 resizeMode="contain"
               />
-              <Text style={styles.LeagueText}>NEPAL CRICKET LEAGUE</Text>
+              <Text style={[styles.LeagueText, { fontFamily: Inter.semiBold }]}>
+                NEPAL CRICKET LEAGUE
+              </Text>
             </View>
 
             <View style={styles.circleRow}>
@@ -270,12 +273,17 @@ const MenuCircle = ({
   onPress?: () => void;
 }) => (
   <TouchableOpacity
-    style={styles.menuCircle}
+    style={styles.menuItem}
     onPress={onPress}
     activeOpacity={0.8}
   >
-    <Icons name={icon} size={32} color="#fff" />
-    <Text style={styles.menuLabel}>{label}</Text>
+    <View style={styles.iconCircle}>
+      <Icons name={icon} size={32} color="#fff" />
+    </View>
+
+    <Text style={[styles.menuLabel, { fontFamily: Inter.medium }]}>
+      {label}
+    </Text>
   </TouchableOpacity>
 );
 
@@ -357,7 +365,7 @@ const styles = StyleSheet.create({
   middleContainer: {
     flex: 1,
     justifyContent: 'space-between',
-    paddingVertical: 20,
+    paddingVertical: 15,
   },
   centerContent: {
     alignItems: 'center',
@@ -370,9 +378,13 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 20,
   },
-  menuCircle: {
+  menuItem: {
+    alignItems: 'center',
     width: 86,
-    height: 86,
+  },
+  iconCircle: {
+    width: 66,
+    height: 66,
     backgroundColor: '#ff0766cb',
     borderRadius: 43,
     justifyContent: 'center',
@@ -380,14 +392,13 @@ const styles = StyleSheet.create({
   },
   menuLabel: {
     color: '#fff',
-    fontSize: 11.5,
-    fontWeight: '700',
+    fontSize: 13,
     marginTop: 8,
+    textAlign: 'center',
   },
-
   trophySection: {
     alignItems: 'center',
-    marginVertical: 34,
+    marginVertical: 40,
   },
   trophyImage: {
     width: 140,
@@ -396,7 +407,6 @@ const styles = StyleSheet.create({
   LeagueText: {
     backgroundColor: '#042577',
     color: '#fff',
-    fontWeight: '900',
     fontSize: 18,
     paddingHorizontal: 28,
     paddingVertical: 12,

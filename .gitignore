@@ -73,3 +73,13 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+android/app/build/
+android/build/
+ios/build/
+*.log
+.DS_Store
+node_modules/
+android/app/src/main/assets/
+ios/link-assets-manifest.json
+android/link-assets-manifest.json

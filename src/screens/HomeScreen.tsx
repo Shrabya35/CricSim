@@ -16,6 +16,7 @@ import { commonStyles } from '../styles/commonStyles';
 import CustomAlert from '../components/CustomAlert';
 import { gameService } from '../services/gameService';
 import RNExitApp from 'react-native-exit-app';
+import { Inter } from '../constants/fonts';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -108,14 +109,18 @@ const HomeScreen = () => {
               navigation.navigate('Dashboard');
             }}
           >
-            <Text style={styles.buttonText}>Continue</Text>
+            <Text style={[styles.buttonText, { fontFamily: Inter.medium }]}>
+              Continue
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
             activeOpacity={0.8}
             onPress={() => setNewAlertVisible(true)}
           >
-            <Text style={styles.buttonText}>New Game</Text>
+            <Text style={[styles.buttonText, { fontFamily: Inter.medium }]}>
+              New Game
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -126,7 +131,9 @@ const HomeScreen = () => {
           navigation.navigate('Settings');
         }}
       >
-        <Text style={styles.buttonText}>Settings</Text>
+        <Text style={[styles.buttonText, { fontFamily: Inter.medium }]}>
+          Settings
+        </Text>
       </TouchableOpacity>
 
       {reset && (

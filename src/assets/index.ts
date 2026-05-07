@@ -17,6 +17,7 @@ import Clear from './clear.png';
 import Head from './head.png';
 import Tail from './tail.png';
 import Coin from './coin.png';
+import Nepal from './nepal_map.png';
 
 export {
   Avenger,
@@ -38,4 +39,5 @@ export {
   Head,
   Tail,
   Coin,
+  Nepal,
 };

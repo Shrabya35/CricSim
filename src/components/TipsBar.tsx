@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { tips } from '../constants';
+import { Poppins } from '../constants/fonts';
 
 const TipsBar = () => {
   const [tip, setTip] = useState<string>('');
@@ -17,19 +18,27 @@ const TipsBar = () => {
   return (
     <View style={styles.floatingContainer}>
       <View style={styles.textContainer}>
-        <Text style={styles.tipText} numberOfLines={3} ellipsizeMode="tail">
+        <Text
+          style={[styles.tipText, { fontFamily: Poppins.regular }]}
+          numberOfLines={3}
+          ellipsizeMode="tail"
+        >
           {tip}
         </Text>
       </View>
 
       <View style={styles.bottomContainer}>
-        <Text style={styles.tipBottomText}>Tip of the day</Text>
+        <Text style={[styles.tipBottomText, { fontFamily: Poppins.regular }]}>
+          Tip of the day
+        </Text>
         <TouchableOpacity
           style={styles.button}
           onPress={showRandomTip}
           activeOpacity={0.8}
         >
-          <Text style={styles.buttonText}>Next Tip</Text>
+          <Text style={[styles.buttonText, { fontFamily: Poppins.regular }]}>
+            Next Tip
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -55,7 +64,7 @@ const styles = StyleSheet.create({
   },
   tipText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 15,
     textAlign: 'center',
   },
   bottomContainer: {
