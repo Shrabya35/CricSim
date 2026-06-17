@@ -45,6 +45,7 @@ import InningsAlert, { partialInning } from '../components/InningsAlert';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import FieldingSelection from '../components/FieldingSelection';
+import BowlerSelection from '../components/BowlerSelection';
 
 type MatchScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -113,6 +114,7 @@ const MatchScreen = () => {
     result: null,
     commentary: 'Lets get Started',
   });
+  const [bowlerSelectVisible, setBowlerSelectVisible] = useState(false);
 
   const pendingActivePlayers = React.useRef<ActivePlayersState | null>(null);
 
@@ -217,7 +219,6 @@ const MatchScreen = () => {
     simulateOneBall();
     setCountdown(3);
 
-    // Countdown
     countdownRef.current = setInterval(() => {
       setCountdown(prev => (prev === 1 ? 3 : prev - 1));
     }, 1000);
@@ -779,10 +780,15 @@ const MatchScreen = () => {
       if (legal && inning.balls % 6 === 0) {
         [left, right] = [right, left];
 
-        const nextIndex = (currentBowlerIndex + 1) % bowlingLineup.length;
-        inning.currentBowlerId =
-          bowlingLineup[nextIndex]?.name || inning.currentBowlerId;
-        setCurrentBowlerIndex(nextIndex);
+        if (prev.bowlingTeam === 'user') {
+          setBowlerSelectVisible(true);
+          setsimulateDisable(true);
+        } else {
+          const nextIndex = (currentBowlerIndex + 1) % bowlingLineup.length;
+          inning.currentBowlerId =
+            bowlingLineup[nextIndex]?.name || inning.currentBowlerId;
+          setCurrentBowlerIndex(nextIndex);
+        }
       }
 
       inning.bowlers[bowlerId] = bowler;
@@ -793,6 +799,23 @@ const MatchScreen = () => {
         [inningKey]: inning,
       };
     });
+  };
+
+  const handleBowlerSelected = (bowlerName: string) => {
+    setGameState(prev => {
+      const inningKey = prev.currentInnings === 1 ? 'inning1' : 'inning2';
+      const baseInning = prev[inningKey];
+      if (!baseInning) return prev;
+      return {
+        ...prev,
+        [inningKey]: {
+          ...baseInning,
+          currentBowlerId: bowlerName,
+        },
+      };
+    });
+    setBowlerSelectVisible(false);
+    setsimulateDisable(false);
   };
 
   const goLeftTab = () => {
@@ -918,9 +941,9 @@ const MatchScreen = () => {
         <>
           <ActivePlayerSection
             activePlayers={activePlayers}
-            batting={battingTeam}
+            batting={gameState.battingTeam}
             theme={
-              battingTeam === 'user'
+              gameState.battingTeam === 'user'
                 ? yourTeam?.themeColor
                 : oppTeam?.themeColor
             }
@@ -928,6 +951,7 @@ const MatchScreen = () => {
               setActivePlayers(prev => {
                 const currentPlayer = prev[side];
                 if (!currentPlayer) return prev;
+
                 return {
                   ...prev,
                   [side]: {
@@ -943,12 +967,12 @@ const MatchScreen = () => {
             {currentBowler && (
               <BallingSection
                 bowler={currentBowler}
-                batting={battingTeam}
+                batting={gameState.battingTeam}
                 fielding={fielding}
                 theme={
-                  battingTeam === 'user'
-                    ? oppTeam?.themeColor
-                    : yourTeam?.themeColor
+                  gameState.bowlingTeam === 'user'
+                    ? yourTeam?.themeColor
+                    : oppTeam?.themeColor
                 }
                 onOk={() => {
                   setsimulateDisable(true);
@@ -1056,6 +1080,14 @@ const MatchScreen = () => {
           setsimulateDisable(false);
         }}
         over={over}
+      />
+      <BowlerSelection
+        visible={bowlerSelectVisible}
+        bowlers={Object.values(currentInning.bowlers)}
+        maxOvers={4}
+        currentBowlerId={currentInning.currentBowlerId}
+        theme={yourTeam?.themeColor}
+        onSelect={handleBowlerSelected}
       />
       <MatchMusic />
     </View>
