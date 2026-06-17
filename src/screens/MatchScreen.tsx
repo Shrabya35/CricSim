@@ -257,7 +257,7 @@ const MatchScreen = () => {
       (tossState.winner === 'user' && tossState.choice === 'bat') ||
       (tossState.winner === 'opp' && tossState.choice !== 'bat');
 
-    const battingTeam2: 'user' | 'opp' = userBats ? 'user' : 'opp';
+    // const battingTeam2: 'user' | 'opp' = userBats ? 'user' : 'opp';
     const bowlingTeam: 'user' | 'opp' = userBats ? 'opp' : 'user';
 
     const localUserTeam = {
@@ -279,6 +279,7 @@ const MatchScreen = () => {
 
     const battingLineup = userBats ? yourPlayers : oppPlayers;
     setBattingOrder(battingLineup);
+    setBattingTeam(userBats ? 'user' : 'opp');
 
     const initialBatsmen = battingLineup.map((p, index) => ({
       player: p,
@@ -313,7 +314,7 @@ const MatchScreen = () => {
 
     setGameState(prev => ({
       ...prev,
-      battingTeam2,
+      battingTeam: userBats ? 'user' : 'opp',
       bowlingTeam,
       inning1: {
         ...prev.inning1,
@@ -941,7 +942,7 @@ const MatchScreen = () => {
         <>
           <ActivePlayerSection
             activePlayers={activePlayers}
-            batting={gameState.battingTeam}
+            batting={battingTeam}
             theme={
               gameState.battingTeam === 'user'
                 ? yourTeam?.themeColor
@@ -1052,7 +1053,9 @@ const MatchScreen = () => {
         visible={wicketAlert}
         batsman={outBatsman}
         theme={
-          battingTeam === 'opp' ? oppTeam?.themeColor : yourTeam?.themeColor
+          gameState.battingTeam === 'user'
+            ? yourTeam?.themeColor
+            : oppTeam?.themeColor
         }
         onOk={() => {
           if (pendingActivePlayers.current) {
@@ -1086,7 +1089,11 @@ const MatchScreen = () => {
         bowlers={Object.values(currentInning.bowlers)}
         maxOvers={4}
         currentBowlerId={currentInning.currentBowlerId}
-        theme={yourTeam?.themeColor}
+        theme={
+          gameState.bowlingTeam === 'user'
+            ? yourTeam?.themeColor
+            : oppTeam?.themeColor
+        }
         onSelect={handleBowlerSelected}
       />
       <MatchMusic />

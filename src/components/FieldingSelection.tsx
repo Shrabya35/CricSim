@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { commonStyles } from '../styles/commonStyles';
 
 interface FieldingSelectionProps {
@@ -16,15 +17,43 @@ interface FieldingSelectionProps {
   over: number;
 }
 
-const ATTACKING_FIELDINGS = ['Attacking 1', 'Attacking 2'];
-
-const ALL_FIELDINGS = [
-  'Attacking 1',
-  'Attacking 2',
-  'Neutral 1',
-  'Neutral 2',
-  'Defensive 1',
-  'Defensive 2',
+const FIELDING_OPTIONS = [
+  {
+    name: 'Attacking 1',
+    icon: 'sword-cross',
+    color: '#ef4444',
+    description: 'Maximum catching fielders',
+  },
+  {
+    name: 'Attacking 2',
+    icon: 'target',
+    color: '#f97316',
+    description: 'Looking for wickets',
+  },
+  {
+    name: 'Neutral 1',
+    icon: 'scale-balance',
+    color: '#3b82f6',
+    description: 'Balanced field placement',
+  },
+  {
+    name: 'Neutral 2',
+    icon: 'shield-half-full',
+    color: '#2563eb',
+    description: 'Attack with protection',
+  },
+  {
+    name: 'Defensive 1',
+    icon: 'shield',
+    color: '#10b981',
+    description: 'Protect the boundary',
+  },
+  {
+    name: 'Defensive 2',
+    icon: 'shield-lock',
+    color: '#059669',
+    description: 'Save every possible run',
+  },
 ];
 
 const FieldingSelection: React.FC<FieldingSelectionProps> = ({
@@ -32,38 +61,59 @@ const FieldingSelection: React.FC<FieldingSelectionProps> = ({
   over,
   onOk,
 }) => {
-  const allowedFieldings = over < 6 ? ATTACKING_FIELDINGS : ALL_FIELDINGS;
+  const fieldings =
+    over < 6
+      ? FIELDING_OPTIONS.filter(item => item.name.startsWith('Attacking'))
+      : FIELDING_OPTIONS;
 
   return (
     <Modal
       transparent
       visible={visible}
-      statusBarTranslucent
       animationType="fade"
+      statusBarTranslucent
     >
       <View style={commonStyles.modalOverlay}>
         <View style={styles.container}>
-          <Text style={styles.title}>Select Fielding</Text>
+          <Text style={styles.title}>Select Field Setting</Text>
 
-          <View style={styles.dropdownContainer}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {allowedFieldings.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 4 }}
+          >
+            {fieldings.map(item => (
+              <TouchableOpacity
+                key={item.name}
+                activeOpacity={0.85}
+                style={styles.card}
+                onPress={() => onOk(item.name)}
+              >
+                <View
                   style={[
-                    styles.dropdownItem,
-                    index === allowedFieldings.length - 1 && {
-                      borderBottomWidth: 0,
-                    },
+                    styles.iconContainer,
+                    { backgroundColor: item.color },
                   ]}
-                  onPress={() => onOk(item)}
-                  activeOpacity={0.85}
                 >
-                  <Text style={styles.dropdownItemText}>{item}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
+                  <MaterialCommunityIcons
+                    name={item.icon}
+                    size={24}
+                    color="#fff"
+                  />
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.cardTitle}>{item.name}</Text>
+                  <Text style={styles.cardSubtitle}>{item.description}</Text>
+                </View>
+
+                <MaterialCommunityIcons
+                  name="chevron-right"
+                  size={28}
+                  color="#888"
+                />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -72,42 +122,55 @@ const FieldingSelection: React.FC<FieldingSelectionProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#2b2b2b',
-    borderRadius: 12,
+    width: 330,
+    maxHeight: '75%',
+    backgroundColor: '#232323',
+    borderRadius: 20,
     padding: 18,
-    width: 280,
+    borderWidth: 1,
+    borderColor: '#3d3d3d',
     elevation: 12,
   },
 
   title: {
-    color: '#ffffff',
-    fontSize: 17,
-    fontWeight: '600',
-    marginBottom: 12,
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#fff',
     textAlign: 'center',
-    letterSpacing: 0.6,
+    marginBottom: 18,
+    letterSpacing: 0.4,
   },
 
-  dropdownContainer: {
-    backgroundColor: '#333333ff',
-    borderRadius: 10,
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2f2f2f',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: '#444',
-    overflow: 'hidden',
-    maxHeight: 260,
   },
 
-  dropdownItem: {
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#444',
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
   },
 
-  dropdownItemText: {
+  cardTitle: {
     color: '#fff',
-    fontSize: 16,
-    letterSpacing: 0.4,
+    fontSize: 17,
+    fontWeight: '700',
+  },
+
+  cardSubtitle: {
+    color: '#a0a0a0',
+    fontSize: 13,
+    marginTop: 3,
   },
 });
 
