@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { Inter } from '../constants/fonts';
 
 export const commonStyles = StyleSheet.create({
   container: {
@@ -17,6 +18,7 @@ export const commonStyles = StyleSheet.create({
   titleText: {
     color: '#fff',
     fontSize: 20,
+    fontFamily: Inter.bold,
   },
   backButton: {
     position: 'absolute',
@@ -31,7 +33,7 @@ export const commonStyles = StyleSheet.create({
   backButoonText: {
     color: '#fff',
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: Inter.semiBold,
   },
   modalOverlay: {
     flex: 1,

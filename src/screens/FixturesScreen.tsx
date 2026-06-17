@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import {
   View,
   Text,
@@ -7,6 +6,7 @@ import {
   ScrollView,
   Image,
   BackHandler,
+  Dimensions,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { RootStackParamList } from '../navigation/types';
@@ -16,6 +16,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { commonStyles } from '../styles/commonStyles';
 import { teamLogos } from '../database/assets';
 import FixturesDB, { fixtures } from '../database/fixturesDB';
+import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Inter } from '../constants/fonts';
+
+const { width } = Dimensions.get('window');
 
 type FixturesScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -30,15 +34,12 @@ const FixturesScreen = () => {
   useEffect(() => {
     const backAction = () => {
       navigation.replace('Dashboard');
-
       return true;
     };
-
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       backAction,
     );
-
     return () => backHandler.remove();
   }, [navigation]);
 
@@ -54,98 +55,116 @@ const FixturesScreen = () => {
     getFixtures();
   }, []);
 
-  const renderFixtures = (item: fixtures, index: number) => {
-    const isCompleted = item.completed;
+  const renderCompletedMatch = (item: fixtures, index: number) => {
+    const isWin = item.winText?.toLowerCase().includes('won');
+    const resultColor = isWin ? '#4caf50' : '#f44336';
+    const shouldSwap = index % 2 === 1;
+
+    const leftTeam = shouldSwap ? item.oppTeam : item.yourTeam;
+    const leftLogo = shouldSwap ? item.oppLogo : item.yourLogo;
+    const leftRun = shouldSwap ? item.oppRun : item.yourRun;
+    const leftWicket = shouldSwap ? item.oppWicket : item.yourWicket;
+
+    const rightTeam = shouldSwap ? item.yourTeam : item.oppTeam;
+    const rightLogo = shouldSwap ? item.yourLogo : item.oppLogo;
+    const rightRun = shouldSwap ? item.yourRun : item.oppRun;
+    const rightWicket = shouldSwap ? item.yourWicket : item.oppWicket;
 
     return (
-      <View key={index}>
-        {isCompleted ? (
-          <View style={styles.fixtureItem}>
-            <View
-              style={{
-                flexDirection: index % 2 === 0 ? 'row' : 'row-reverse',
-                width: '100%',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <View style={styles.teamRow}>
-                <Image
-                  source={teamLogos[item.yourLogo]}
-                  style={styles.teamLogo}
-                />
-                <Text style={styles.teamName}>{item.yourTeam}</Text>
-              </View>
-
-              <View style={styles.scoreContainer}>
-                <View
-                  style={[
-                    styles.scoreBox,
-                    { flexDirection: index % 2 === 0 ? 'row' : 'row-reverse' },
-                  ]}
-                >
-                  <Text style={styles.scoreValue}>
-                    {item.yourRun}-{item.yourWicket}
-                  </Text>
-                  <View style={styles.divider} />
-                  <Text style={styles.scoreValue}>
-                    {item.oppRun}-{item.oppWicket}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.teamRow}>
-                <Image
-                  source={teamLogos[item.oppLogo]}
-                  style={styles.teamLogo}
-                />
-                <Text style={styles.teamName}>{item.oppTeam}</Text>
-              </View>
-            </View>
-
-            {item.winText && <Text style={styles.winText}>{item.winText}</Text>}
+      <View style={styles.matchCard}>
+        <View style={styles.teamsRow}>
+          <View style={styles.teamBlock}>
+            <Image source={teamLogos[leftLogo]} style={styles.teamLogoLarge} />
+            <Text style={styles.teamNameLarge}>{leftTeam}</Text>
           </View>
-        ) : (
-          <View
-            style={[
-              styles.upcomingRow,
-              { flexDirection: index % 2 === 0 ? 'row' : 'row-reverse' },
-            ]}
-          >
-            <View style={styles.teamRow}>
-              <Image
-                source={teamLogos[item.yourLogo]}
-                style={styles.teamLogo}
-              />
-              <Text style={styles.teamName}>{item.yourTeam}</Text>
-            </View>
 
-            <View style={styles.vsContainer}>
-              <Text style={styles.vsText}>VS</Text>
-            </View>
-
-            <View style={styles.teamRow}>
-              <Text style={styles.teamName}>{item.oppTeam}</Text>
-              <Image source={teamLogos[item.oppLogo]} style={styles.teamLogo} />
+          <View style={styles.scoresWrapper}>
+            <View style={styles.scoreChipLarge}>
+              <Text style={styles.scoreTextLarge}>
+                {leftRun}/{leftWicket}
+              </Text>
+              <Text style={styles.scoreSeparator}>-</Text>
+              <Text style={styles.scoreTextLarge}>
+                {rightRun}/{rightWicket}
+              </Text>
             </View>
           </View>
-        )}
+
+          <View style={styles.teamBlock}>
+            <Image source={teamLogos[rightLogo]} style={styles.teamLogoLarge} />
+            <Text style={styles.teamNameLarge}>{rightTeam}</Text>
+          </View>
+        </View>
+
+        <View
+          style={[styles.resultBadge, { backgroundColor: resultColor + '20' }]}
+        >
+          <Icons
+            name={isWin ? 'trophy' : 'emoticon-sad'}
+            size={18}
+            color={resultColor}
+          />
+          <Text style={[styles.resultText, { color: resultColor }]}>
+            {item.winText}
+          </Text>
+        </View>
+      </View>
+    );
+  };
+
+  const renderUpcomingMatch = (item: fixtures, index: number) => {
+    const shouldSwap = index % 2 === 1;
+
+    const leftTeam = shouldSwap ? item.oppTeam : item.yourTeam;
+    const leftLogo = shouldSwap ? item.oppLogo : item.yourLogo;
+    const rightTeam = shouldSwap ? item.yourTeam : item.oppTeam;
+    const rightLogo = shouldSwap ? item.yourLogo : item.oppLogo;
+
+    return (
+      <View style={styles.matchCard}>
+        <View style={styles.teamsRow}>
+          <View style={styles.teamBlock}>
+            <Image source={teamLogos[leftLogo]} style={styles.teamLogoLarge} />
+            <Text style={styles.teamNameLarge}>{leftTeam}</Text>
+          </View>
+
+          <View style={styles.vsCircleLarge}>
+            <Text style={styles.vsTextLarge}>VS</Text>
+          </View>
+
+          <View style={styles.teamBlock}>
+            <Image source={teamLogos[rightLogo]} style={styles.teamLogoLarge} />
+            <Text style={styles.teamNameLarge}>{rightTeam}</Text>
+          </View>
+        </View>
+
+        <View style={styles.upcomingMeta}>
+          <Icons name="calendar-clock" size={16} color="#aaa" />
+          <Text style={styles.upcomingText}>Upcoming Match</Text>
+        </View>
       </View>
     );
   };
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.statusBar, { height: insets.top }]} />
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={commonStyles.titleContainer}>
         <Text style={commonStyles.titleText}>Fixtures</Text>
       </View>
+
       <ScrollView
-        style={{ width: '100%' }}
-        contentContainerStyle={{ marginTop: 30, paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
       >
-        {fixture.map(renderFixtures)}
+        {fixture.map((item, index) => (
+          <View key={index}>
+            {item.completed
+              ? renderCompletedMatch(item, index)
+              : renderUpcomingMatch(item, index)}
+          </View>
+        ))}
       </ScrollView>
+
       <TouchableOpacity
         style={commonStyles.backButton}
         onPress={() => navigation.replace('Dashboard')}
@@ -158,103 +177,126 @@ const FixturesScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  statusBar: {
-    backgroundColor: 'black',
-    width: '100%',
-  },
   container: {
     flex: 1,
-    alignItems: 'center',
     backgroundColor: '#242424ff',
-    paddingBottom: 50,
-  },
-  fixtureItem: {
-    backgroundColor: '#333333ff',
-    width: '100%',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
+  },
+  scrollContent: {
+    alignItems: 'center',
+    paddingBottom: 100,
     paddingTop: 20,
-    marginBottom: 20,
+    width: '100%',
   },
-  scoreContainer: {
+  matchCard: {
+    width: width * 0.8,
+    backgroundColor: '#333333ff',
+    borderRadius: 24,
+    marginBottom: 24,
+    padding: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#2c2c2c',
+  },
+  teamsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  teamBlock: {
+    alignItems: 'center',
     flex: 1,
-    alignItems: 'center',
+    gap: 8,
   },
-
-  scoreBox: {
-    backgroundColor: '#444',
-    paddingVertical: 8,
-    paddingHorizontal: 18,
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 15,
+  teamLogoLarge: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#ff0766cb',
   },
-
-  divider: {
-    width: 1,
-    height: 20,
-    backgroundColor: '#777',
-  },
-
-  scoreValue: {
+  teamNameLarge: {
     color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-
-  centerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 20,
-  },
-
-  winText: {
-    paddingVertical: 10,
-    color: '#ddd',
-    fontSize: 13,
+    fontSize: 14,
+    fontFamily: Inter.semiBold,
     textAlign: 'center',
   },
-  upcomingRow: {
-    width: '100%',
+  scoresWrapper: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#333333ff',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    marginBottom: 20,
+    justifyContent: 'center',
+    flex: 1,
   },
-
-  vsContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
-
-  vsText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-
-  teamRow: {
+  scoreChipLarge: {
+    backgroundColor: '#2c2c2c',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 40,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-
-  teamLogo: {
-    width: 30,
-    height: 30,
+  scoreTextLarge: {
+    color: '#ffd966',
+    fontSize: 16,
+    fontFamily: Inter.semiBold,
   },
-
-  teamName: {
+  scoreSeparator: {
+    color: '#aaa',
+    fontSize: 16,
+    fontFamily: Inter.bold,
+  },
+  resultBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 6,
+    paddingVertical: 6,
+    borderRadius: 40,
+  },
+  resultText: {
+    fontSize: 13,
+    fontFamily: Inter.semiBold,
+  },
+  vsCircleLarge: {
+    backgroundColor: '#ff0766cb',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#ff0766',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  vsTextLarge: {
     color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  upcomingMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 8,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#2c2c2c',
+  },
+  upcomingText: {
+    color: '#aaa',
+    fontSize: 12,
+    fontFamily: Inter.semiBold,
   },
 });
+
 export default FixturesScreen;

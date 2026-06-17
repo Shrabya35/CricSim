@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   BackHandler,
 } from 'react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   useFocusEffect,
   useNavigation,
@@ -102,6 +102,13 @@ const MatchScreen = () => {
 
   const [bothTeam, setBothTeam] = useState<inningInterface | null>(null);
 
+  const [isSimulating, setIsSimulating] = useState(false);
+  const simulationIntervalRef = React.useRef<ReturnType<
+    typeof setInterval
+  > | null>(null);
+  const [countdown, setCountdown] = useState(3);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const [outComeString, setOutcomeString] = useState<commentaryString>({
     result: null,
     commentary: 'Lets get Started',
@@ -161,6 +168,66 @@ const MatchScreen = () => {
     const sub = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => sub.remove();
   }, []);
+
+  const stopSimulation = useCallback(() => {
+    if (simulationIntervalRef.current) {
+      clearInterval(simulationIntervalRef.current);
+      simulationIntervalRef.current = null;
+    }
+
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+
+    setCountdown(3);
+    setIsSimulating(false);
+  }, []);
+
+  useEffect(() => {
+    if (simulateDisable || inningsAlert || wicketAlert) {
+      stopSimulation();
+    }
+  }, [simulateDisable, inningsAlert, wicketAlert, stopSimulation]);
+
+  const prevBallsRef = React.useRef(currentInning.balls);
+  useEffect(() => {
+    const balls = currentInning.balls;
+    if (
+      isSimulating &&
+      balls > 0 &&
+      balls % 6 === 0 &&
+      balls !== prevBallsRef.current
+    ) {
+      stopSimulation();
+    }
+    prevBallsRef.current = balls;
+  }, [currentInning.balls, isSimulating, stopSimulation]);
+
+  useEffect(() => {
+    return () => stopSimulation();
+  }, [stopSimulation]);
+
+  const startSimulation = () => {
+    if (isSimulating) {
+      stopSimulation();
+      return;
+    }
+
+    simulateOneBall();
+    setCountdown(3);
+
+    // Countdown
+    countdownRef.current = setInterval(() => {
+      setCountdown(prev => (prev === 1 ? 3 : prev - 1));
+    }, 1000);
+
+    simulationIntervalRef.current = setInterval(() => {
+      simulateOneBall();
+    }, 3000);
+
+    setIsSimulating(true);
+  };
 
   const getMatchDetail = useCallback(async () => {
     const match = await gameService.getNextMatch();
@@ -939,12 +1006,15 @@ const MatchScreen = () => {
           </View>
           <View style={styles.bottomButtonsContainer}>
             <TouchableOpacity
-              style={styles.mainButton}
+              style={[
+                styles.mainButton,
+                // isSimulating && { backgroundColor: '#555' },
+              ]}
               activeOpacity={0.8}
-              onPress={simulateOneBall}
+              onPress={startSimulation}
             >
               <Text style={{ color: '#fff', fontSize: 21, fontWeight: '900' }}>
-                Simulate
+                {isSimulating ? `Stop (...${countdown})` : 'Simulate'}
               </Text>
             </TouchableOpacity>
           </View>

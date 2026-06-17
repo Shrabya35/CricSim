@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import {
   View,
   Text,
@@ -7,6 +6,7 @@ import {
   ScrollView,
   Image,
   BackHandler,
+  Dimensions,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { RootStackParamList } from '../navigation/types';
@@ -16,29 +16,30 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HistoryDB, { History } from '../database/historyDB';
 import { commonStyles } from '../styles/commonStyles';
 import { teamLogos } from '../database/assets';
+import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Inter } from '../constants/fonts';
 
-type HisotryScreenNavigationProp = NativeStackNavigationProp<
+const { width } = Dimensions.get('window');
+
+type HistoryScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'History'
 >;
 
 const HistoryScreen = () => {
-  const navigation = useNavigation<HisotryScreenNavigationProp>();
+  const navigation = useNavigation<HistoryScreenNavigationProp>();
   const insets = useSafeAreaInsets();
   const [history, setHistory] = useState<History[]>([]);
 
   useEffect(() => {
     const backAction = () => {
       navigation.replace('Dashboard');
-
       return true;
     };
-
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       backAction,
     );
-
     return () => backHandler.remove();
   }, [navigation]);
 
@@ -54,51 +55,47 @@ const HistoryScreen = () => {
     getHistory();
   }, []);
 
-  const renderHistory = (item: History, index: number) => {
+  const renderHistoryItem = (item: History, index: number) => {
     return (
-      <View key={index} style={styles.historyItem}>
-        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: '#fff', fontSize: 18 }}>{item.year}</Text>
-          <Text style={styles.winnerText}>Winner</Text>
+      <View key={index} style={styles.historyCard}>
+        <View style={styles.yearSection}>
+          <Text style={styles.yearText}>{item.year}</Text>
+          {!item.ongoing && (
+            <View style={styles.winnerBadge}>
+              <Icons name="trophy" size={14} color="#ffd966" />
+              <Text style={styles.winnerBadgeText}>Winner</Text>
+            </View>
+          )}
         </View>
+
         {item.ongoing ? (
-          <Text style={{ color: 'white', fontSize: 18 }}>Ongoing</Text>
+          <View style={styles.ongoingContainer}>
+            <Icons name="progress-clock" size={20} color="#ff0766cb" />
+            <Text style={styles.ongoingText}>Ongoing Season</Text>
+          </View>
         ) : (
-          <View
-            style={{
-              flexDirection: 'row',
-              gap: 20,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <Image
-              source={teamLogos[item.logo]}
-              style={{
-                width: 40,
-                height: 40,
-              }}
-            />
-            <Text style={{ color: '#fff', fontSize: 18, fontWeight: 600 }}>
-              {item.winner}
-            </Text>
+          <View style={styles.winnerContainer}>
+            <Image source={teamLogos[item.logo]} style={styles.winnerLogo} />
+            <Text style={styles.winnerName}>{item.winner}</Text>
           </View>
         )}
       </View>
     );
   };
+
   return (
-    <View style={styles.container}>
-      <View style={[styles.statusBar, { height: insets.top }]} />
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={commonStyles.titleContainer}>
         <Text style={commonStyles.titleText}>History</Text>
       </View>
+
       <ScrollView
-        style={{ width: '100%' }}
-        contentContainerStyle={{ marginTop: 30, paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
       >
-        {history.map(renderHistory)}
+        {history.map(renderHistoryItem)}
       </ScrollView>
+
       <TouchableOpacity
         style={commonStyles.backButton}
         onPress={() => navigation.replace('Dashboard')}
@@ -111,31 +108,90 @@ const HistoryScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  statusBar: {
-    backgroundColor: 'black',
-    width: '100%',
-  },
   container: {
     flex: 1,
-    alignItems: 'center',
     backgroundColor: '#242424ff',
-    paddingBottom: 50,
-  },
-  historyItem: {
-    backgroundColor: '#333333ff',
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    marginBottom: 20,
   },
-  winnerText: {
+  scrollContent: {
+    alignItems: 'center',
+    paddingBottom: 100,
+    paddingTop: 20,
+    width: '100%',
+  },
+  historyCard: {
+    width: width * 0.8,
+    backgroundColor: '#333333ff',
+    borderRadius: 24,
+    marginBottom: 24,
+    padding: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#2c2c2c',
+    alignItems: 'center',
+  },
+  yearSection: {
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  yearText: {
     color: '#fff',
-    paddingVertical: 1,
-    padding: 10,
+    fontSize: 22,
+    fontFamily: Inter.bold,
+    marginBottom: 6,
+  },
+  winnerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     backgroundColor: '#ff0766cb',
-    marginTop: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  winnerBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontFamily: Inter.semiBold,
+  },
+  winnerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 8,
+  },
+  winnerLogo: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#ff0766cb',
+    backgroundColor: '#fff',
+  },
+  winnerName: {
+    color: '#ffd966',
+    fontSize: 18,
+    fontFamily: Inter.semiBold,
+  },
+  ongoingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 8,
+    backgroundColor: 'rgba(255, 7, 102, 0.2)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 40,
+  },
+  ongoingText: {
+    color: '#ff0766cb',
+    fontSize: 14,
+    fontFamily: Inter.semiBold,
   },
 });
+
 export default HistoryScreen;

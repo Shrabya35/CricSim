@@ -24,7 +24,7 @@ import InfoModal from '../components/InfoModal';
 import StandingsDB from '../database/standings';
 import HistoryDB from '../database/historyDB';
 import FixturesDB from '../database/fixturesDB';
-import { Inter } from '../constants/fonts';
+import { Inter, Poppins } from '../constants/fonts';
 
 type DashboardScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -153,21 +153,27 @@ const DashboardScreen = () => {
             activeOpacity={0.8}
             onPress={() => team && navigation.navigate('Club', { team: team })}
           >
-            <Text style={styles.topButoonTetx}>Club</Text>
+            <Text style={[styles.topButoonTetx, { fontFamily: Inter.medium }]}>
+              Club
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.topSectionButton}
             activeOpacity={0.8}
             onPress={() => navigation.navigate('Fixtures')}
           >
-            <Text style={styles.topButoonTetx}>Fixtures</Text>
+            <Text style={[styles.topButoonTetx, { fontFamily: Inter.medium }]}>
+              Fixtures
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.topSectionButton}
             activeOpacity={0.8}
             onPress={() => navigation.navigate('History')}
           >
-            <Text style={styles.topButoonTetx}>History</Text>
+            <Text style={[styles.topButoonTetx, { fontFamily: Inter.medium }]}>
+              History
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -228,7 +234,11 @@ const DashboardScreen = () => {
             onPress={() => setBackAlertVisible(true)}
             activeOpacity={0.8}
           >
-            <Text style={styles.backButtonText}>Back</Text>
+            <Text
+              style={[styles.backButtonText, { fontFamily: Poppins.semiBold }]}
+            >
+              Back
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -236,7 +246,11 @@ const DashboardScreen = () => {
             activeOpacity={0.8}
             onPress={() => navigation.navigate('MatchCenter')}
           >
-            <Text style={styles.mainButtonText}>Match Center</Text>
+            <Text
+              style={[styles.mainButtonText, { fontFamily: Poppins.semiBold }]}
+            >
+              Match Center
+            </Text>
           </TouchableOpacity>
         </View>
         <CustomAlert
@@ -295,8 +309,12 @@ const ActionBox = ({
   subtitle: string;
 }) => (
   <View style={styles.actionBox}>
-    <Text style={styles.actionTitle}>{title}</Text>
-    <Text style={styles.actionSubtitle}>{subtitle}</Text>
+    <Text style={[styles.actionTitle, { fontFamily: Inter.regular }]}>
+      {title}
+    </Text>
+    <Text style={[styles.actionSubtitle, { fontFamily: Poppins.medium }]}>
+      {subtitle}
+    </Text>
   </View>
 );
 
@@ -360,7 +378,6 @@ const styles = StyleSheet.create({
   topButoonTetx: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 600,
   },
   middleContainer: {
     flex: 1,
@@ -427,13 +444,11 @@ const styles = StyleSheet.create({
   actionTitle: {
     fontSize: 20,
     color: '#fff',
-    fontWeight: '400',
   },
   actionSubtitle: {
     color: '#fff',
     fontSize: 12,
     marginTop: 6,
-    fontWeight: '600',
     backgroundColor: '#ff0766cb',
     paddingHorizontal: 10,
     paddingVertical: 2,
@@ -460,7 +475,6 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: '#fff',
     fontSize: 20,
-    fontWeight: 'bold',
   },
   mainButtonText: {
     color: '#fff',

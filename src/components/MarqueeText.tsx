@@ -3,7 +3,7 @@ import { Animated, View, StyleSheet } from 'react-native';
 
 interface MarqueeProps {
   text: string;
-  speed?: number; // pixels per second
+  speed?: number;
 }
 
 const Marquee: React.FC<MarqueeProps> = ({ text, speed = 50 }) => {
@@ -18,9 +18,9 @@ const Marquee: React.FC<MarqueeProps> = ({ text, speed = 50 }) => {
     const duration = (distance / speed) * 1000;
 
     const animate = () => {
-      translateX.setValue(containerWidth); // start from right
+      translateX.setValue(containerWidth);
       Animated.timing(translateX, {
-        toValue: -textWidth, // move to left
+        toValue: -textWidth,
         duration: duration,
         useNativeDriver: true,
         easing: undefined,
@@ -39,8 +39,8 @@ const Marquee: React.FC<MarqueeProps> = ({ text, speed = 50 }) => {
         <Animated.Text
           onLayout={e => setTextWidth(e.nativeEvent.layout.width)}
           style={[styles.text, { transform: [{ translateX }] }]}
-          numberOfLines={1} // keep text in one line
-          ellipsizeMode="clip" // do not add ...
+          numberOfLines={1}
+          ellipsizeMode="clip"
         >
           {text}
         </Animated.Text>
